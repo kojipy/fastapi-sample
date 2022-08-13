@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Response
 from sqlalchemy.orm import Session
 
 from . import crud, models, schemas
@@ -29,11 +29,14 @@ def health_check(db: Session = db_session):
 
 
 @app.post("/users/", response_model=schemas.User)
-def create_user(user: schemas.UserCreate, db: Session = db_session):
+def create_user(user: schemas.UserCreate, response: Response, db: Session = db_session):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    return crud.create_user(db=db, user=user)
+
+    user, token = crud.create_user(db=db, user=user)
+    response.headers["X-API-TOKEN"] = token
+    return user
 
 
 @app.get("/users/", response_model=List[schemas.User])

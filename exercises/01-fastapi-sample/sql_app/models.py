@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -13,6 +13,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     items = relationship("Item", back_populates="owner")
+    tokens = relationship("Token", back_populates="user", uselist=False)
 
 
 class Item(Base):
@@ -24,3 +25,13 @@ class Item(Base):
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="items")
+
+
+class Token(Base):
+    __tablename__ = "tokens"
+
+    token = Column(String, primary_key=True, index=True)
+    token_limit = Column(DateTime)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
+
+    user = relationship("User", back_populates="tokens")
