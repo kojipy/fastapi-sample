@@ -22,7 +22,7 @@ def get_db():
 
 def has_api_token(request: Request):
     if "x-api-token" not in request.headers.keys():
-        raise HTTPException(status_code=404, detail="`x-api-token` not contained")
+        raise HTTPException(status_code=401, detail="`x-api-token` not contained")
     return request
 
 
