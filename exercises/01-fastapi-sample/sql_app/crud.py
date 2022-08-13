@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 
 from . import auth, models, schemas
@@ -38,3 +40,9 @@ def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
     db.commit()
     db.refresh(db_item)
     return db_item
+
+
+def authorized_tokens(db: Session):
+    return (
+        db.query(models.Token).filter(models.Token.token_limit > datetime.now()).all()
+    )
