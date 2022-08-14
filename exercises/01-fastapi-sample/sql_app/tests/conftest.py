@@ -41,11 +41,11 @@ def client():
 
 
 @pytest.fixture()
-def sample_user_response(client):
+def sample_user(client):
     Base.metadata.create_all(bind=engine)
+    password = "password"
     response = client.post(
-        "/users/",
-        json={"email": "sample@example.com", "password": "password"},
+        "/users/", json={"email": "sample@example.com", "password": password}
     )
-    yield response
+    yield {"response": response, "password": password}
     Base.metadata.drop_all(bind=engine)
