@@ -38,3 +38,14 @@ def test_db():
 def client():
     client = TestClient(app)
     return client
+
+
+@pytest.fixture()
+def sample_user_response(client):
+    Base.metadata.create_all(bind=engine)
+    response = client.post(
+        "/users/",
+        json={"email": "sample@example.com", "password": "password"},
+    )
+    yield response
+    Base.metadata.drop_all(bind=engine)

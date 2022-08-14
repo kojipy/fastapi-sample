@@ -18,15 +18,10 @@ def test_create_user(test_db, client):
     assert data["id"] == user_id
 
 
-def test_authorize(test_db, client):
-    response = client.post(
-        "/users/",
-        json={"email": "sameone@example.com", "password": "passpasspass"},
-    )
-    assert response.status_code == 200, response.text
+def test_authorize(sample_user_response, client):
 
-    token = response.headers["x-api-token"]
-    data = response.json()
+    token = sample_user_response.headers["x-api-token"]
+    data = sample_user_response.json()
     user_id = data["id"]
 
     # correct token
@@ -38,14 +33,9 @@ def test_authorize(test_db, client):
     assert response.status_code == 401, response.text
 
 
-def test_inclued_api_token_request(test_db, client):
-    response = client.post(
-        "/users/",
-        json={"email": "dummy@example.com", "password": "fakepassword"},
-    )
-    assert response.status_code == 200, response.text
-    token = response.headers["x-api-token"]
-    data = response.json()
+def test_inclued_api_token_request(sample_user_response, client):
+    token = sample_user_response.headers["x-api-token"]
+    data = sample_user_response.json()
     user_id = data["id"]
 
     response = client.get(f"/users/{user_id}", headers={"x-api-token": token})
