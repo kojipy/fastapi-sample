@@ -42,6 +42,17 @@ def health_check(db: Session = db_session):
     return {"status": "ok"}
 
 
+@app.post("/login/", response_model=schemas.User)
+def login(user: schemas.UserLogin, response: Response, db: Session = db_session):
+    result = crud.login(db, user)
+    if not result:
+        raise HTTPException(status_code="401", detail="email or password is invalid")
+    else:
+        user, token = result
+        response.headers["x-api-token"] = token
+        return user
+
+
 @app.post("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, response: Response, db: Session = db_session):
     db_user = crud.get_user_by_email(db, email=user.email)
