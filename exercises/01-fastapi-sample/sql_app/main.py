@@ -124,3 +124,14 @@ def read_my_items(
     check_authorized(db, token)
     items = crud.get_items(db, token, only_me=False, skip=skip, limit=limit)
     return items
+
+
+@app.delete("/users/{user_id}/delete/")
+def delete_user(
+    user_id: int,
+    request: Request = has_token,
+    db: Session = db_session,
+):
+    check_authorized(db, request.headers["x-api-token"])
+    crud.delete_user(db, user_id)
+    return Response(status_code=200)

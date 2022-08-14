@@ -97,3 +97,20 @@ def test_my_items(sample_user, client):
     assert items[0]["description"] == item_create["description"]
     assert items[0]["id"] == user_id
     assert items[0]["owner_id"] == user_id
+
+
+def test_delete_user(sample_user, client):
+    sample_user_response = sample_user["response"]
+    token = sample_user_response.headers["x-api-token"]
+    data = sample_user_response.json()
+    user_id = data["id"]
+
+    response = client.delete(
+        f"/users/{user_id}/delete/", headers={"x-api-token": token}
+    )
+    assert response.status_code == 200, response.text
+
+    response_users = client.get("/users/", headers={"x-api-token": token})
+    sample_user = response_users.json()[0]
+    assert sample_user["email"] == data["email"]
+    assert not sample_user["is_active"]
