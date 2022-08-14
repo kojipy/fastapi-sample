@@ -107,6 +107,20 @@ def read_items(
     request: Request = has_token,
     db: Session = db_session,
 ):
-    check_authorized(db, request.headers["x-api-token"])
-    items = crud.get_items(db, skip=skip, limit=limit)
+    token = request.headers["x-api-token"]
+    check_authorized(db, token)
+    items = crud.get_items(db, token, only_me=False, skip=skip, limit=limit)
+    return items
+
+
+@app.get("/me/items/", response_model=List[schemas.Item])
+def read_my_items(
+    skip: int = 0,
+    limit: int = 100,
+    request: Request = has_token,
+    db: Session = db_session,
+):
+    token = request.headers["x-api-token"]
+    check_authorized(db, token)
+    items = crud.get_items(db, token, only_me=False, skip=skip, limit=limit)
     return items

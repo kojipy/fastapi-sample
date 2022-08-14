@@ -74,3 +74,26 @@ def test_login(sample_user, client):
     data = response.json()
     assert data["email"] == email
     assert data["id"] == user_id
+
+
+def test_my_items(sample_user, client):
+    sample_user_response = sample_user["response"]
+    token = sample_user_response.headers["x-api-token"]
+    data = sample_user_response.json()
+    user_id = data["id"]
+
+    # create item
+    item_create = {"title": "sample-task", "description": "This is Sample task"}
+    response = client.post(
+        f"/users/{user_id}/items/", headers={"x-api-token": token}, json=item_create
+    )
+    assert response.status_code == 200, response.text
+
+    response = client.get("/me/items", headers={"x-api-token": token})
+    assert response.status_code == 200, response.text
+    items = response.json()
+
+    assert items[0]["title"] == item_create["title"]
+    assert items[0]["description"] == item_create["description"]
+    assert items[0]["id"] == user_id
+    assert items[0]["owner_id"] == user_id

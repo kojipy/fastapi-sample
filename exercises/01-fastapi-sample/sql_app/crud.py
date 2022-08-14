@@ -13,6 +13,11 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 
+def get_user_by_token(db: Session, token: str):
+    db_token = db.query(models.Token).filter(models.Token.token == token).first()
+    return get_user(db, db_token.user_id)
+
+
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
 
@@ -32,8 +37,15 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user, token
 
 
-def get_items(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Item).offset(skip).limit(limit).all()
+def get_items(
+    db: Session, token: str, only_me: bool = False, skip: int = 0, limit: int = 100
+):
+    items = db.query(models.Item)
+    if only_me:
+        user = get_user_by_token(db, token)
+        return items.filter(models.Item.owner == user).offset(skip).limit(limit).all()
+    else:
+        return items.offset(skip).limit(limit).all()
 
 
 def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
