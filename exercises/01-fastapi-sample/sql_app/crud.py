@@ -72,10 +72,10 @@ def login(db: Session, user: schemas.UserLogin):
         return False
 
     token, limit = auth.create_token()
-    token_db = db.query(models.Token).filter(models.Token.user_id == user_db.id).first()
-    token_db.token_limit = limit
+    db_token = db.query(models.Token).filter(models.Token.user_id == user_db.id).first()
+    db_token.token_limit = limit
     db.commit()
-    db.refresh(token_db)
+    db.refresh(db_token)
 
     return user_db, token
 
