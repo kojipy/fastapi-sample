@@ -122,7 +122,8 @@ def read_my_items(
 ):
     token = request.headers["x-api-token"]
     check_authorized(db, token)
-    items = crud.get_items(db, token, only_me=False, skip=skip, limit=limit)
+    user_id = crud.get_userid_by_token(db, token)
+    items = crud.get_items(db, user_id, only_me=False, skip=skip, limit=limit)
     return items
 
 

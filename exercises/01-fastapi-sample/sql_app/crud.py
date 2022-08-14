@@ -18,6 +18,11 @@ def get_user_by_token(db: Session, token: str):
     return get_user(db, db_token.user_id)
 
 
+def get_userid_by_token(db: Session, token: str):
+    user = get_user_by_token(db, token)
+    return user.id
+
+
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
 
@@ -38,11 +43,11 @@ def create_user(db: Session, user: schemas.UserCreate):
 
 
 def get_items(
-    db: Session, token: str, only_me: bool = False, skip: int = 0, limit: int = 100
+    db: Session, user_id: int, only_me: bool = False, skip: int = 0, limit: int = 100
 ):
     items = db.query(models.Item)
     if only_me:
-        user = get_user_by_token(db, token)
+        user = get_user(db, user_id)
         return items.filter(models.Item.owner == user).offset(skip).limit(limit).all()
     else:
         return items.offset(skip).limit(limit).all()
