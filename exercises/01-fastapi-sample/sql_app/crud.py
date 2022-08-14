@@ -27,6 +27,20 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
 
 
+def next_owner(db: Session):
+    """Retunrs user will have items deleted user had
+
+    Returns:
+        user (models.User): next ownwer
+    """
+    return (
+        db.query(models.User)
+        .filter(models.User.is_active == True)
+        .order_by(models.User.id)
+        .first()
+    )
+
+
 def create_user(db: Session, user: schemas.UserCreate):
     fake_hashed_password = auth.get_hashed_password(user.password)
     token, limit = auth.create_token()
@@ -90,3 +104,13 @@ def delete_user(db: Session, user_id: int):
     db_user.is_active = False
     db.commit()
     db.refresh(db_user)
+
+    items = get_items(db, db_user.id, only_me=True)
+    owner = next_owner(db)
+    for item in items:
+        item.owner_id = owner.id
+        db.commit()
+        db.refresh(item)
+
+    db.commit()
+    db.refresh(owner)

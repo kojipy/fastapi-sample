@@ -105,6 +105,19 @@ def test_delete_user(sample_user, client):
     data = sample_user_response.json()
     user_id = data["id"]
 
+    # add item
+    _ = client.post(
+        f"/users/{user_id}/items/",
+        headers={"x-api-token": token},
+        json={"title": "sample-task", "descripthion": "This is Sample task"},
+    )
+
+    # add next owner
+    next_owner_response = client.post(
+        "/users/",
+        json={"email": "next-owner@example.com", "password": "password"},
+    )
+
     response = client.delete(
         f"/users/{user_id}/delete/", headers={"x-api-token": token}
     )
@@ -114,3 +127,8 @@ def test_delete_user(sample_user, client):
     sample_user = response_users.json()[0]
     assert sample_user["email"] == data["email"]
     assert not sample_user["is_active"]
+
+    item_response = client.get(
+        "/items/", headers={"x-api-token": next_owner_response.headers["x-api-token"]}
+    )
+    assert item_response.json()[0]["owner_id"] == next_owner_response.json()["id"]
