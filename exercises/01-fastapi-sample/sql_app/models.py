@@ -13,7 +13,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     items = relationship("Item", back_populates="owner")
-    tokens = relationship("Token", back_populates="user", uselist=False)
+    token = relationship("Token", back_populates="user", uselist=False)
 
 
 class Item(Base):
@@ -32,6 +32,6 @@ class Token(Base):
 
     token = Column(String, primary_key=True, index=True)
     token_limit = Column(DateTime)
-    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
 
-    user = relationship("User", back_populates="tokens")
+    user = relationship("User", back_populates="token")
